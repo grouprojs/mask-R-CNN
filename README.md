@@ -31,13 +31,21 @@ wget https://download.pytorch.org/models/resnet101-63fe2227.pth # resnet-101 pre
 wget https://download.pytorch.org/models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth # maskrcnn resnet-50-fpn pre-trained weights using COCO
 ```
  
-## dataset
+## Dataset
 ### COCO2017
 * Download at: https://cocodataset.org/
+```
+wget http://images.cocodataset.org/zips/train2017.zip
+wget http://images.cocodataset.org/zips/val2017.zip
+wget http://images.cocodataset.org/zips/test2017.zip
+```
 * Save into ./data/coco2017
 
 ### Pascal VOC2012
 * Download at： http://host.robots.ox.ac.uk/pascal/VOC/voc2012/index.html#devkit
+```
+wget http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar
+```
 * Save into ./data/VOCdevkit
 
 ## Training
