@@ -151,27 +151,30 @@ def main(args):
         lr_scheduler.step()
 
         # evaluate after every epoch
-        det_info, seg_info = utils.evaluate(model, data_loader_test, device=device)
+        try: 
+            det_info, seg_info = utils.evaluate(model, data_loader_test, device=device)
 
-        # 只在主进程上进行写操作
-        if args.rank in [-1, 0]:
-            train_loss.append(mean_loss.item())
-            learning_rate.append(lr)
-            val_map.append(det_info[1])  # pascal mAP
+            # 只在主进程上进行写操作
+            if args.rank in [-1, 0]:
+                train_loss.append(mean_loss.item())
+                learning_rate.append(lr)
+                val_map.append(det_info[1])  # pascal mAP
 
-            # write into txt
-            with open(det_results_file, "a") as f:
-                # 写入的数据包括coco指标还有loss和learning rate
-                result_info = [f"{i:.4f}" for i in det_info + [mean_loss.item()]] + [f"{lr:.6f}"]
-                txt = "epoch:{} {}".format(epoch, '  '.join(result_info))
-                f.write(txt + "\n")
+                # write into txt
+                with open(det_results_file, "a") as f:
+                    # 写入的数据包括coco指标还有loss和learning rate
+                    result_info = [f"{i:.4f}" for i in det_info + [mean_loss.item()]] + [f"{lr:.6f}"]
+                    txt = "epoch:{} {}".format(epoch, '  '.join(result_info))
+                    f.write(txt + "\n")
 
-            with open(seg_results_file, "a") as f:
-                # 写入的数据包括coco指标还有loss和learning rate
-                result_info = [f"{i:.4f}" for i in seg_info + [mean_loss.item()]] + [f"{lr:.6f}"]
-                txt = "epoch:{} {}".format(epoch, '  '.join(result_info))
-                f.write(txt + "\n")
-
+                with open(seg_results_file, "a") as f:
+                    # 写入的数据包括coco指标还有loss和learning rate
+                    result_info = [f"{i:.4f}" for i in seg_info + [mean_loss.item()]] + [f"{lr:.6f}"]
+                    txt = "epoch:{} {}".format(epoch, '  '.join(result_info))
+                    f.write(txt + "\n")
+        except:
+            print(f"unable to evaluate epoch {epoch}. Continue.")
+            
         if args.output_dir:
             # 只在主进程上执行保存权重操作
             save_files = {'model': model_without_ddp.state_dict(),

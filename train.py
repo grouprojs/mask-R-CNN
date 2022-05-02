@@ -14,7 +14,7 @@ from train_utils import GroupedBatchSampler, create_aspect_ratio_groups
 
 
 
-def create_model(num_classes, load_pretrain_weights=False):
+def create_model(num_classes, load_pretrain_weights=True):
     # change from nn.BatchNorm2d to FrozenBatchNorm2d if GPU memory is small
     # FrozenBatchNorm2d cannot update its parameters
     # change batch_size to 4 or 8 if GPU memory is small
@@ -28,13 +28,13 @@ def create_model(num_classes, load_pretrain_weights=False):
     # Resnet-50 ImageNet weights: wget https://download.pytorch.org/models/resnet50-0676ba61.pth
     # Resnet-101 ImageNet weights: wget https://download.pytorch.org/models/resnet101-63fe2227.pth
 
-    # # resnet50-c4
+    # resnet50-c4
     # backbone = resnet_backbone(pretrain_path="resnet50-0676ba61.pth", trainable_layers=0, resnet_layers=50)
 
-    # resnet101-c4
+    # # resnet101-c4
     backbone = resnet_backbone(pretrain_path="resnet101-63fe2227.pth", trainable_layers=0, resnet_layers=101)
     
-    # # resnet50-fpn    
+    # resnet50-fpn    
     # backbone = resnet_fpn_backbone(pretrain_path="resnet50-0676ba61.pth", trainable_layers=0, resnet_layers=50)
 
     # # resnet101-fpn
@@ -58,6 +58,7 @@ def create_model(num_classes, load_pretrain_weights=False):
 def main(args):
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     print("Using {} device training.".format(device.type))
+    
 
     # to save coco_info
     now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -126,7 +127,7 @@ def main(args):
     model.to(device)
 
     # print mode
-    print(model)
+    # print(model)
     # from torchinfo import summary
     # summary(model, input_size=(batch_size, 3, 799, 1201))
 
@@ -171,23 +172,28 @@ def main(args):
         lr_scheduler.step()
 
         # evaluate on the test dataset
-        det_info, seg_info = utils.evaluate(model, val_data_loader, device=device)
+        try:
+            det_info, seg_info = utils.evaluate(model, val_data_loader, device=device)
 
-        # write detection into txt
-        with open(det_results_file, "a") as f:
+            # write detection into txt
+            with open(det_results_file, "a") as f:
             # include loss and learning rate
-            result_info = [f"{i:.4f}" for i in det_info + [mean_loss.item()]] + [f"{lr:.6f}"]
-            txt = "epoch:{} {}".format(epoch, '  '.join(result_info))
-            f.write(txt + "\n")
+                result_info = [f"{i:.4f}" for i in det_info + [mean_loss.item()]] + [f"{lr:.6f}"]
+                txt = "epoch:{} {}".format(epoch, '  '.join(result_info))
+                f.write(txt + "\n")
 
-        # write seg into txt
-        with open(seg_results_file, "a") as f:
-            # include loss and learning rate
-            result_info = [f"{i:.4f}" for i in seg_info + [mean_loss.item()]] + [f"{lr:.6f}"]
-            txt = "epoch:{} {}".format(epoch, '  '.join(result_info))
-            f.write(txt + "\n")
+            # write seg into txt
+            with open(seg_results_file, "a") as f:
+                # include loss and learning rate
+                result_info = [f"{i:.4f}" for i in seg_info + [mean_loss.item()]] + [f"{lr:.6f}"]
+                txt = "epoch:{} {}".format(epoch, '  '.join(result_info))
+                f.write(txt + "\n")
 
-        val_map.append(det_info[1])  # pascal mAP
+            val_map.append(det_info[1])  # pascal mAP
+
+        except:
+            print(f"unable to evaluate epoch {epoch}. Continue.")
+
 
         # save weights
         save_files = {
