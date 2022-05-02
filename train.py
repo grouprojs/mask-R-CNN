@@ -12,6 +12,9 @@ from my_dataset_voc import VOCInstances
 from train_utils import train_eval_utils as utils
 from train_utils import GroupedBatchSampler, create_aspect_ratio_groups
 
+import torch.multiprocessing
+torch.multiprocessing.set_sharing_strategy('file_system')
+
 
 
 def create_model(num_classes, load_pretrain_weights=True):
