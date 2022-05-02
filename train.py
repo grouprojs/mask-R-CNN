@@ -29,28 +29,28 @@ def create_model(num_classes, load_pretrain_weights=True):
     # Resnet-101 ImageNet weights: wget https://download.pytorch.org/models/resnet101-63fe2227.pth
 
     # resnet50-c4
-    # backbone = resnet_backbone(pretrain_path="resnet50-0676ba61.pth", trainable_layers=0, resnet_layers=50)
+    # backbone = resnet_backbone(pretrain_path="resnet50-0676ba61.pth", trainable_layers=4, resnet_layers=50)
 
     # # resnet101-c4
-    backbone = resnet_backbone(pretrain_path="resnet101-63fe2227.pth", trainable_layers=0, resnet_layers=101)
+    # backbone = resnet_backbone(pretrain_path="resnet101-63fe2227.pth", trainable_layers=4, resnet_layers=101)
     
     # resnet50-fpn    
-    # backbone = resnet_fpn_backbone(pretrain_path="resnet50-0676ba61.pth", trainable_layers=0, resnet_layers=50)
+    backbone = resnet_fpn_backbone(pretrain_path="resnet50-0676ba61.pth", trainable_layers=5, resnet_layers=50)
 
     # # resnet101-fpn
-    # backbone = resnet_fpn_backbone(pretrain_path="resnet101-63fe2227.pth", trainable_layers=0, resnet_layers=101)
+    # backbone = resnet_fpn_backbone(pretrain_path="resnet101-63fe2227.pth", trainable_layers=5, resnet_layers=101)
     
     # mask R-CNN
     model = MaskRCNN(backbone, num_classes=num_classes)
 
-    if load_pretrain_weights:
-        # resnet50-fpn coco weights url: "https://download.pytorch.org/models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth"
-        weights_dict = torch.load("./maskrcnn_resnet50_fpn_coco.pth", map_location="cpu")
-        for k in list(weights_dict.keys()):
-            if ("box_predictor" in k) or ("mask_fcn_logits" in k):
-                del weights_dict[k]
+    # if load_pretrain_weights:
+    #     # resnet50-fpn coco weights url: "https://download.pytorch.org/models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth"
+    #     weights_dict = torch.load("./maskrcnn_resnet50_fpn_coco.pth", map_location="cpu")
+    #     for k in list(weights_dict.keys()):
+    #         if ("box_predictor" in k) or ("mask_fcn_logits" in k):
+    #             del weights_dict[k]
 
-        print(model.load_state_dict(weights_dict, strict=False))
+    #     print(model.load_state_dict(weights_dict, strict=False))
 
     return model
 
